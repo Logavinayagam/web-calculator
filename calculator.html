@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Web Calculator</title>
+<style>
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(to bottom, #b0b0b0, #888888);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+
+  .calculator {
+    background-color: rgba(0, 0, 0, 0.85);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    width: 420px;
+  }
+
+  .display {
+    background-color: #111;
+    border-radius: 10px;
+    padding: 10px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #input {
+    background: transparent;
+    color: white;
+    font-size: 1.8em;
+    border: none;
+    outline: none;
+    width: 100%;
+    caret-color: lime;
+  }
+
+  #result {
+    color: #00ff00;
+    font-size: 2em;
+    word-wrap: break-word;
+    min-height: 28px;
+  }
+
+  .buttons {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+  }
+
+  button {
+    padding: 15px;
+    font-size: 1.2em;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    background-color: #004080;
+    color: #cce6ff;
+    transition: background 0.3s;
+    user-select: none;
+  }
+
+  button:hover {
+    background-color: #0059b3;
+  }
+
+  .clear { background-color: #0077b6; color: white; }
+  .del { background-color: #0099e6; color: white; }
+  .equal { background-color: #00a896; color: white; grid-column: span 5; font-weight: bold; }
+  .ans { background-color: #ff8800; font-weight: bold; color: white; }
+  
+  .func-btn {
+    background-color: #1a75ff;
+    color: white;
+  }
+
+  .func-btn:hover {
+    background-color: #3399ff;
+  }
+</style>
+</head>
+<body>
+  <div class="calculator">
+    <div class="display">
+      <input type="text" id="input" value="0" autocomplete="off" spellcheck="false" />
+      <div id="result"></div>
+    </div>
+    <div class="buttons">
+      <button class="clear" onclick="clearDisplay()">C</button>
+      <button class="del" onclick="delChar()">DEL</button>
+      <button onclick="insert('(')">(</button>
+      <button onclick="insert(')')">)</button>
+      <button onclick="insert('**')">^</button>
+
+      <button onclick="insert('π')" class="func-btn">π</button>
+      <button onclick="insert('e')" class="func-btn">e</button>
+      <button onclick="insert('log')" class="func-btn">log</button>
+      <button onclick="insert('√')" class="func-btn">√</button>
+      <button onclick="insert('/')" >/</button>
+
+      <button onclick="insert('7')">7</button>
+      <button onclick="insert('8')">8</button>
+      <button onclick="insert('9')">9</button>
+      <button onclick="insert('*')">×</button>
+      <button onclick="insert('sin')" class="func-btn">sin</button>
+
+      <button onclick="insert('4')">4</button>
+      <button onclick="insert('5')">5</button>
+      <button onclick="insert('6')">6</button>
+      <button onclick="insert('-')">-</button>
+      <button onclick="insert('cos')" class="func-btn">cos</button>
+
+      <button onclick="insert('1')">1</button>
+      <button onclick="insert('2')">2</button>
+      <button onclick="insert('3')">3</button>
+      <button onclick="insert('+')">+</button>
+      <button onclick="insert('tan')" class="func-btn">tan</button>
+
+      <button onclick="insert('0')">0</button>
+      <button onclick="insert('.')">.</button>
+      <button class="ans" onclick="insert('Ans')">Ans</button>
+      <button onclick="insert('!')">!</button>
+      <button onclick="insert('%')">%</button>
+
+      <button class="equal" onclick="calculate()">=</button>
+    </div>
+  </div>
+
+<script>
+  const input = document.getElementById('input');
+  const result = document.getElementById('result');
+  let answer = "";
+  let justCalculated = false;
+
+  function insert(val) {
+    const operators = ['+', '-', '*', '/', '**', '%'];
+
+    if (justCalculated) {
+      if (operators.includes(val)) {
+        input.value = answer + val;
+      } else if (val === 'Ans') {
+        input.value = answer;
+      } else {
+        input.value = val;
+      }
+      justCalculated = false;
+      input.selectionStart = input.selectionEnd = input.value.length;
+      input.focus();
+      return;
+    }
+
+    const start = input.selectionStart;
+    const end = input.selectionEnd;
+    const text = input.value;
+
+    
+    if(text === "0" && val.match(/[0-9πe]/)) {
+      input.value = val;
+      input.selectionStart = input.selectionEnd = val.length;
+      return;
+    }
+
+    input.value = text.slice(0, start) + val + text.slice(end);
+    input.focus();
+    input.selectionStart = input.selectionEnd = start + val.length;
+  }
+
+  function clearDisplay() {
+    input.value = "0";
+    result.innerText = "";
+    answer = "";
+    justCalculated = false;
+  }
+
+  function delChar() {
+    const start = input.selectionStart;
+    const end = input.selectionEnd;
+    if (start === end && start > 0) {
+      input.value = input.value.slice(0, start - 1) + input.value.slice(end);
+      input.selectionStart = input.selectionEnd = start - 1;
+    } else {
+      input.value = input.value.slice(0, start) + input.value.slice(end);
+      input.selectionStart = input.selectionEnd = start;
+    }
+  }
+
+  function fact(n) {
+    n = Math.floor(n);
+    if (n < 0) return NaN;
+    if (n === 0 || n === 1) return 1;
+    let f = 1;
+    for (let i = 2; i <= n; i++) f *= i;
+    return f;
+  }
+
+  function calculate() {
+    try {
+      let expr = input.value;      
+      expr = expr.replace(/Ans/g, answer || "0");
+      expr = expr.replace(/π/g, 'Math.PI');      
+      expr = expr.replace(/(\d+)e(\d+)/g, '($1*10**$2)');
+      expr = expr.replace(/sin/g, 'Math.sin');
+      expr = expr.replace(/cos/g, 'Math.cos');
+      expr = expr.replace(/tan/g, 'Math.tan');
+      expr = expr.replace(/log/g, 'Math.log10');
+      expr = expr.replace(/√/g, 'Math.sqrt');
+      expr = expr.replace(/(\d+|\))!/g, (match, p1) => `fact(${p1})`);
+      expr = expr.replace(/(\d+(\.\d+)?)%/g, (_, num) => `(${num}/100)`);
+      const resultVal = eval(expr);
+
+      if(resultVal === undefined || isNaN(resultVal)) {
+        throw new Error("Invalid Calculation");
+      }
+
+      answer = resultVal.toString();
+      result.innerText = "= " + answer;
+      justCalculated = true;
+      input.selectionStart = input.selectionEnd = input.value.length;
+    } catch (e) {
+      result.innerText = "Error";
+      justCalculated = false;
+    }
+  }
+</script>
+</body>
+</html>
